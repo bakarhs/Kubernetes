@@ -60,4 +60,179 @@ https://github.com/bakarhs/docker
 kubectl get service
 ```
 
+# Making our app on K8
+
+![img_2.png](img_2.png)
+
+This is the structure we aim to replicate
+
+This link will help with the many K8 commands
+
+https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+
+Main commands needed:
+
+```commandline
+kubectl create -f <name of file.yml>
+kubectl delete deployment <name of deployment>
+kubectl edit deploy <deployfilename>.yml
+kubectl get pods
+kubectl get delpoy
+kubectl get service #or kubectl get svc
+kubectl describe <name.yml>
+
+```
+- We need to create YAML files for both deployment and service of each application
+- *Note* create in a specific order nginx-> mongo -> sparta-app
+
+nginx-deployment.yml:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: nginx-deployment
+
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: bakarhs/nginx-tech201:v1
+
+          ports:
+            - containerPort: 80
+          imagePullPolicy: Always
+```
+
+nginx-service.yml:
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: default
+spec:
+  ports:
+  - nodePort: 30001
+    port: 80
+
+    targetPort: 80
+  selector:
+    app: nginx
+  type: NodePort
+```
+
+app-deployment.yml
+```yaml
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: sparta-app
+spec:
+  selector:
+    matchLabels:
+      app: sparta-app
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: sparta-app
+    spec:
+      containers:
+        - name: sparta-app
+          image: bakarhs/sparta-app:v2
+
+          env:
+            - name: DB_HOST
+              value: mongodb://mongo:27017/dev
+
+          ports:
+            - containerPort: 3000
+          imagePullPolicy: Always
+```
+
+app-service.yml
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: sparta-app
+  namespace: default
+spec:
+  ports:
+  - nodePort: 30002
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: sparta-app
+  type: NodePort
+```
+
+mongo-deployment:
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: bakarhs/mongo:v2
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: storage
+              mountPath: /data/db
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+```
+
+mongo-service.yml:
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+spec:
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: 27017
+```
+
 
