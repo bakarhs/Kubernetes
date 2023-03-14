@@ -181,17 +181,6 @@ spec:
 
 mongo-deployment:
 ```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongo-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 256Mi
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -212,13 +201,6 @@ spec:
           image: bakarhs/mongo:v2
           ports:
             - containerPort: 27017
-          volumeMounts:
-            - name: storage
-              mountPath: /data/db
-      volumes:
-        - name: storage
-          persistentVolumeClaim:
-            claimName: mongo-pvc
 ```
 
 mongo-service.yml:
