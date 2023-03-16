@@ -39,3 +39,30 @@ spec:
             claimName: mongo-db
 
 ---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+spec:
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: 27017
+
+---
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sparta-mongo-db-deploy
+  namespace: default
+spec:
+  maxReplicas: 9
+  minReplicas: 3
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mongo
+  targetCPUUtilizationPercentage: 50

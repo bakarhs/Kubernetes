@@ -217,4 +217,19 @@ spec:
       targetPort: 27017
 ```
 
+# Adding persistent storage and auto-scaling
+
+![img_3.png](img_3.png)
+
+# K8 Cluster Migration
+
+- Find out how to install K8 on linux
+- Build an ec2 instance with correct dependencies to launch my cluster
+- In the ec2 instance update upgrade and install docker and kubernetes.
+- copy my Kubernetes files from my local machine to the ec2 instance
+- change my code to remove the volumes in mongo
+- individual run the .yml files ,so I can check everything is working step by step first 
+- run my script to create my cluster
+
+
 
